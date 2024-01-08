@@ -13,7 +13,7 @@ const socket = io("https://andarbaharbacked.onrender.com", {
   },
 });
 function App() {
-  const [gameState, setGameState] = useState({ value: 30 });
+  const [gameState, setGameState] = useState({ value: "waiting" });
   const [user, setUser] = useState(null);
   const [coins, setCoins] = useState(50);
   const [mainCard, setMainCard] = useState([]);
@@ -21,13 +21,20 @@ function App() {
   const [andarCards, setAndarCards] = useState([]);
   // const [flag, setFlag] = useState(true);
   // const [index, setIndex] = useState(0);
+  const maincard=useRef({})
+  const baharcards=useRef([])
+  const andarcards=useRef([])
+  const count=useRef([])
   useEffect(() => {
     // Listen for game state updates from the server
     socket.on("gameUpdate", (updatedGameState) => {
       console.log(updatedGameState);
       setGameState(updatedGameState.gamestate);
-      // count.current=pdatedGameState.gamestate.value
-      setMainCard(updatedGameState.mainCard);
+      count.current=updatedGameState.gamestate.value
+      // setMainCard(updatedGameState.mainCard);
+      maincard.current=updatedGameState.mainCard
+      baharcards.current=updatedGameState.mainCard.baharcards
+      andarcards.current=updatedGameState.mainCard.andarcards
       console.log(updatedGameState.mainCard);
     });
 
@@ -42,6 +49,30 @@ function App() {
       // setUser(data.user);
     });
 
+    console.log(andarcards);
+    console.log(baharcards);
+    // if (gameState.value == 9) {
+    //   intervalId = setInterval(() => {
+    //     if (index >= 6) {
+    //       clearInterval(intervalId);
+    //       setIndex(0);
+    //       setBaharCards([]);
+    //       setAndarCards([]);
+    //     }
+    //     if (flag) {
+    //       setBaharCards([...baharCards, mainCard?.baharcards[index]]);
+    //       setFlag(!flag);
+    //     } else {
+    //       setAndarCards([...andarCards, mainCard?.baharcards[index]]);
+    //       setIndex(index + 1);
+    //       console.log(index);
+    //       setFlag(!flag);
+    //     }
+    //   }, 1000);
+    // }
+    // setBaharCards([]);
+    // setAndarCards([]);
+
     return () => {
       // Clean up socket connection on component unmount
       // clearInterval(intervalId);
@@ -50,56 +81,44 @@ function App() {
   }, []);
   // var intervalId;
 
-  // useEffect(() => {
-  //   if(gameState?.value == 9){
-  //     interval()
-
-  //   }
-    // return (()=>{
-    //   // clearInterval(intervalId);
-    // })
-  // },[])
-
-  // if(gameState?.value ==0){
-  //   setAndarCards([])
-  //   setBaharCards([])
-  // }
   useEffect(() => {
-    if (gameState?.value == 9) {
-      // Call the interval function when count becomes 10
-      interval();
+    if(count.current == 9){
+
+      interval()
     }
-    else if(gameState?.value==29){
-      setAndarCards([])
-      setBaharCards([])
-    }
-  }, [gameState?.value]);
- 
+    return (()=>{
+      // clearInterval(id);
+    })
+  },[count.current == 9])
+
+  if(gameState?.value ==0){
+    setAndarCards([])
+    setBaharCards([])
+  }
 function interval(){
-  let diff=Math.max(mainCard?.baharcards.length,mainCard?.andarcards.length)
-  console.log("diff",diff);
   let baharCardsArr=[]
   let andarCardsArr=[]
   let flag=true
    let index= 0
-   var intervalId = setInterval(() => {
-    if (index >=diff) {
+   const intervalId = setInterval(() => {
+    if (index >=5) {
       clearInterval(intervalId);
-      return
+      // return
     }
     if (flag) {
-      baharCardsArr.push( mainCard?.baharcards[index])
+      baharCardsArr.push( baharcards.current[index])
       setBaharCards([...baharCardsArr]);
       flag=!flag;
     } else {
-      andarCardsArr.push( mainCard?.andarcards[index])
+      andarCardsArr.push( andarcards.current[index])
       setAndarCards([...andarCardsArr]);
       index=index+1
-      flag=!flag;
       
       console.log(baharCards);
+      flag=!flag;
     }
-  }, 800);
+    // return intervalId;
+  }, 700);
 }
   console.log("andarCards", andarCards);
 
@@ -127,9 +146,9 @@ function interval(){
 
   return (
     <>
-      <h3>{gameState?.value < 5 ? mainCard?.winstatus : ""}</h3>
-      <h2 className="count">{gameState?.value }</h2>
-      <h2>{mainCard?.main_card}</h2>
+      <h3>{gameState?.value < 5 ? maincard.current?.winstatus : ""}</h3>
+      <h2 className="count">{count.current }</h2>
+      <h2>{maincard.current?.main_card}</h2>
       <div >
         {andarCards?.map((card, ind) => (
           <div
